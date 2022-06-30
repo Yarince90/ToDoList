@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>To Do List</title>
+    </head>
+    <body>
+
+  <h1><%= kindOfDay %></h1>
+
+    <ul>
+
+        <% for(let i = 0; i < newListItems.length; i++){ %>
+           <li><%= newListItems[i] %></l1>
+        <% } %>
+
+        
+    </ul>
+
+    <form action="/" method="post">
+        <input type="text" name="newItem" placeholder="New Item">
+        <button type="submit" name="submit">Add To List</button>
+    </form>
+
+    </body>
+</html>
