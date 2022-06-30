@@ -7,6 +7,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 let items = [];
+let workItems = [];
 
 app.get('/', (req, res)=>{
     let today = new Date();
@@ -18,16 +19,27 @@ app.get('/', (req, res)=>{
     };
 
     let day = today.toLocaleDateString("en-us", options);
-    res.render('list.ejs', {kindOfDay: day, newListItems: items});
+    
+    res.render('list.ejs', {listTitle: day, newListItems: items});
+});
+
+app.get('/work', (req, res)=>{
+    res.render('list.ejs', {listTitle: "Work List", newListItems: workItems})
 });
 
 app.post('/', (req, res)=>{
     let item = req.body.newItem;
 
-    items.push(item);
+    if(req.body.list === "Work"){
+        workItems.push(item);
+        res.redirect('/work');
+    }
+    else{
+        items.push(item);
+        res.redirect('/');
+    }
+});
 
-    res.redirect('/');
-})
 
 
 app.listen(port, ()=>{
