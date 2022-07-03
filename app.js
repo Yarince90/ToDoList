@@ -27,10 +27,10 @@ const wakeUp = new Item({
     name: "Wake Up"
 });
 const eat = new Item({
-    name: "eat"
+    name: "Eat"
 });
 const sleep = new Item({
-    name: "sleep"
+    name: "Sleep"
 });
 const defaultItems = [wakeUp, eat, sleep];
 
@@ -70,16 +70,24 @@ app.get('/work', (req, res)=>{
 
 //PostsItems to corresponding To-Do-List
 app.post('/', (req, res)=>{
-    let item = req.body.newItem;
+   
+    const itemName = req.body.newItem;
+    const item = new Item({
+        name: itemName
+    });
 
-    if(req.body.list === "Work"){
-        workItems.push(item);
-        res.redirect('/work');
-    }
-    else{
-        items.push(item);
-        res.redirect('/');
-    }
+    item.save();
+   
+    res.redirect('/');
+
+    // if(req.body.list === "Work"){
+    //     workItems.push(item);
+    //     res.redirect('/work');
+    // }
+    // else{
+    //     items.push(item);
+    //     res.redirect('/');
+    // }
 });
 
 
