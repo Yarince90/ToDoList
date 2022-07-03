@@ -90,6 +90,20 @@ app.post('/', (req, res)=>{
     // }
 });
 
+app.post("/delete", (req, res)=>{
+    const itemID = req.body.checkBox;
+
+    Item.findByIdAndDelete(itemID, (err)=>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.redirect('/');
+            console.log("Item successfully removed!");
+        }
+    });
+});
+
 
 app.listen(port, ()=>{
     console.log("Server is started on port: " + port);

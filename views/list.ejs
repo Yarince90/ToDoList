@@ -11,11 +11,15 @@
     </div>
     
     <div class="box">
-        
 
-        <% newListItems.forEach((item)=>{ %>
-            <p><%= item.name %></p>
-        <% }) %>
+    <% newListItems.forEach((item)=>{ %>
+        <form action="/delete" method="post">
+            <div class="item">
+                <input type="checkbox" name="checkBox" value="<%= item._id %>" onchange="this.form.submit()">
+                <p><%= item.name %></p>
+            </div>
+        </form>
+    <% }) %>
 
         <form class="item" action="/" method="post">
             <input type="text" name="newItem" placeholder="New Item" autocomplete="off">
