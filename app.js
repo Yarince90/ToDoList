@@ -19,8 +19,16 @@ const itemSchema = new mongoose.Schema ({
         require: [true, "Item name cannot be empty"]
     }
 });
-
 const Item = mongoose.model("Item", itemSchema);
+
+//Customer List Schema
+const listSchema = {
+title: String,
+items: [itemSchema]
+};
+const List = mongoose.model("List", listSchema);
+
+
 
 //Items for testing DB connection
 const wakeUp = new Item({
@@ -36,7 +44,6 @@ const defaultItems = [wakeUp, eat, sleep];
 
 
 
-
 //Loads Main To-Do List page
 app.get('/', (req, res)=>{
     //Sets todays date
@@ -44,7 +51,6 @@ app.get('/', (req, res)=>{
 
     //Look for Items in DB
     Item.find({}, (err, foundItems)=>{
-
         //Save default data for testing if there is none, else it loads data
         if(foundItems.length === 0){
             Item.insertMany(defaultItems, (err)=>{
@@ -63,31 +69,39 @@ app.get('/', (req, res)=>{
     });
 });
 
-//Loads Work To-Do-List
-app.get('/work', (req, res)=>{
-    res.render('list.ejs', {listTitle: "Work List", newListItems: workItems})
+//Dynamically creates To-Do-List page
+app.get('/:listID', (req, res)=>{
+    const requestedList = req.params.listID;
+    
+    //Looks for existing List
+    List.findOne({title: requestedList}, (err, foundList)=>{
+      if (!err && !foundList){
+        const list = new List({
+            title: requestedList,
+            items: defaultItems
+        });        
+        list.save();
+        console.log("No Matches found ...created new list ...");
+
+        res.redirect('/' + requestedList);
+      }
+      else {
+        console.log("List Found!");
+        res.render('list', {listTitle: foundList.title, newListItems: foundList.items});
+      }
+    });
+    
 });
 
 //PostsItems to corresponding To-Do-List
 app.post('/', (req, res)=>{
-   
+
     const itemName = req.body.newItem;
     const item = new Item({
         name: itemName
     });
-
     item.save();
-   
     res.redirect('/');
-
-    // if(req.body.list === "Work"){
-    //     workItems.push(item);
-    //     res.redirect('/work');
-    // }
-    // else{
-    //     items.push(item);
-    //     res.redirect('/');
-    // }
 });
 
 app.post("/delete", (req, res)=>{
