@@ -54,7 +54,7 @@ app.get('/', (req, res)=>{
                     console.log(err);
                 }
                 else{
-                    console.log("Items successfully added!");
+                    console.log("Items for testing successfully added to Today!");
                 }
             });
             res.redirect('/');
@@ -78,7 +78,7 @@ app.get('/:listID', (req, res)=>{
             items: defaultItems
         });        
         list.save();
-        console.log("Items successfully added to: " + requestedList);
+        console.log("Items for testing successfully added to: " + requestedList);
         res.redirect('/' + requestedList);
         }
         else {
