@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const date = require (__dirname + '/date.js');
-
+const _ = require('lodash');
 const app = express();
 const port = 3000;
 app.set('view engine', 'ejs');
@@ -28,8 +28,6 @@ items: [itemSchema]
 };
 const List = mongoose.model("List", listSchema);
 
-
-
 //Items for testing DB connection
 const wakeUp = new Item({
     name: "Wake Up"
@@ -42,12 +40,10 @@ const sleep = new Item({
 });
 const defaultItems = [wakeUp, eat, sleep];
 
-
-
 //Loads Main To-Do List page
 app.get('/', (req, res)=>{
-    //Sets todays date
-    let day = date.getDate();
+    //Sets Todays date
+   // let day = date.getDate();
 
     //Look for Items in DB
     Item.find({}, (err, foundItems)=>{
@@ -64,30 +60,30 @@ app.get('/', (req, res)=>{
             res.redirect('/');
         }
         else{
-            res.render('list.ejs', {listTitle: day, newListItems: foundItems});
+            res.render('list.ejs', {listTitle: "Today", newListItems: foundItems});
         }
     });
 });
 
 //Dynamically creates To-Do-List page
 app.get('/:listID', (req, res)=>{
-    const requestedList = req.params.listID;
+    const requestedList = _.capitalize(req.params.listID);
     
     //Looks for existing List
     List.findOne({title: requestedList}, (err, foundList)=>{
-      if (!err && !foundList){
-        const list = new List({
+      if (!err){
+        if(!foundList){
+            const list = new List({
             title: requestedList,
             items: defaultItems
         });        
         list.save();
-        console.log("No Matches found ...created new list ...");
-
+        console.log("Items successfully added to: " + requestedList);
         res.redirect('/' + requestedList);
-      }
-      else {
-        console.log("List Found!");
-        res.render('list', {listTitle: foundList.title, newListItems: foundList.items});
+        }
+        else {
+            res.render('list', {listTitle: foundList.title, newListItems: foundList.items});
+          }
       }
     });
     
@@ -95,27 +91,50 @@ app.get('/:listID', (req, res)=>{
 
 //PostsItems to corresponding To-Do-List
 app.post('/', (req, res)=>{
-
     const itemName = req.body.newItem;
+    const listName = req.body.list;
+    
     const item = new Item({
         name: itemName
     });
-    item.save();
-    res.redirect('/');
+
+    if(listName === "Today"){
+        item.save();
+        res.redirect('/');
+    } else{
+        List.findOne({title: listName}, (err, foundList)=>{
+            foundList.items.push(item);
+            foundList.save();
+            res.redirect('/' + listName);
+        });
+    }
 });
 
+//Delete Items
 app.post("/delete", (req, res)=>{
     const itemID = req.body.checkBox;
+    const listName = req.body.listName;
 
-    Item.findByIdAndDelete(itemID, (err)=>{
-        if(err){
-            console.log(err);
-        }
-        else{
-            res.redirect('/');
-            console.log("Item successfully removed!");
-        }
-    });
+    if(listName === "Today"){
+        Item.findByIdAndDelete(itemID, (err)=>{
+            if(err){
+                console.log(err);
+            }
+            else{
+                res.redirect('/');
+            }
+        });
+    } else{
+        List.findOneAndUpdate(
+            {title: listName},
+            {$pull: {items: {_id: itemID}}},
+            (err, result)=>{
+                if(!err){
+                    res.redirect('/' + listName);
+                }
+            }
+        )
+    }
 });
 
 
