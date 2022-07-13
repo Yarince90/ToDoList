@@ -16,14 +16,17 @@ mongoose.connect("mongodb://localhost:27017/toDoListDB", {useNewUrlParser: true}
 const itemSchema = new mongoose.Schema ({
     name: {
         type: String,
-        require: [true, "Item name cannot be empty"]
+        required: [true, "Item name cannot be empty"]
     }
 });
 const Item = mongoose.model("Item", itemSchema);
 
 //Customer List Schema
 const listSchema = {
-title: String,
+title: {
+    type: String,
+    required: [true, "List name cannot be empty"]
+    },
 items: [itemSchema]
 };
 const List = mongoose.model("List", listSchema);
@@ -99,8 +102,14 @@ app.post('/', (req, res)=>{
     });
 
     if(listName === "Today"){
-        item.save();
-        res.redirect('/');
+        if(itemName !== ""){
+            item.save();
+            res.redirect('/');
+        }
+        else{
+            console.log("To Do Item cannot be empty.");
+            res.redirect('/');
+        }
     } else{
         List.findOne({title: listName}, (err, foundList)=>{
             foundList.items.push(item);
